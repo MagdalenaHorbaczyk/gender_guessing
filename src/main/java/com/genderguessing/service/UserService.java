@@ -11,20 +11,27 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
 @Service
 public class UserService {
     File maleFile = new File(getMaleFile());
     File femaleFile = new File(getFemaleFile());
 
-    public void guessGenderByFirstToken(String name) throws FileReaderException {
+    public String guessGenderByFirstToken(String name) throws FileReaderException {
         String firstToken = tokenize(name).get(0);
+        String result = null;
         if ((checkMaleList(firstToken)) >= 1) {
-            System.out.println(name + " is male.");
+            result = name + " is male.";
+//            System.out.println(name + " is male.");
         } else if ((checkFemaleList(firstToken)) >= 1) {
+            result = name + " is female.";
             System.out.println(name + " is female.");
         } else {
-            System.out.println(name + " is inconclusive.");
+            result = name + " is inconclusive.";
+//            System.out.println(name + " is inconclusive.");
         }
+        System.out.println(result);
+        return result;
     }
 
     public List<String> tokenize(String name) {
@@ -58,7 +65,7 @@ public class UserService {
         return Objects.requireNonNull(getClassLoader().getResource("file/male.txt")).getFile();
     }
 
-    private int checkFemaleList(String firstToken) throws FileReaderException {
+    public int checkFemaleList(String firstToken) throws FileReaderException {
         List<String> firstTokenInFemaleList;
         try (Stream<String> femaleLines = getFemaleLines()) {
             firstTokenInFemaleList = femaleLines
@@ -82,22 +89,24 @@ public class UserService {
         return getClass().getClassLoader();
     }
 
-    public void guessGenderByFullName(String name) throws FileReaderException {
+    public String guessGenderByFullName(String name) throws FileReaderException {
+        String result;
         List<String> nameTokens = tokenize(name);
         List<String> maleTokensFound = checkMaleListByFullName(nameTokens);
         List<String> femaleTokensFound = checkFemaleListByFullName(nameTokens);
         if (maleTokensFound.size() > (femaleTokensFound.size())
                 && (maleTokensFound.size() + femaleTokensFound.size() == nameTokens.size())) {
-            System.out.println(name + " is male.");
+            result = name + " is male.";
         } else if (maleTokensFound.size() < femaleTokensFound.size()
                 && (maleTokensFound.size() + femaleTokensFound.size() == nameTokens.size())) {
-            System.out.println(name + " is female.");
+            result = name + " is female.";
         } else {
-            System.out.println(name + " is inconclusive.");
+            result = name + " is inconclusive.";
         }
+        return result;
     }
 
-    private List<String> checkMaleListByFullName(List<String> nameTokens) throws FileReaderException {
+    public List<String> checkMaleListByFullName(List<String> nameTokens) throws FileReaderException {
         List<String> maleTokensFound;
         try (Stream<String> fileLines = getMaleLines()) {
             Set<String> maleSet = new HashSet<>(nameTokens);
@@ -110,7 +119,7 @@ public class UserService {
         return maleTokensFound;
     }
 
-    private List<String> checkFemaleListByFullName(List<String> nameTokens) throws FileReaderException {
+    public List<String> checkFemaleListByFullName(List<String> nameTokens) throws FileReaderException {
         List<String> femaleTokensFound;
         try (Stream<String> fileLinesFemale = getFemaleLines()) {
             Set<String> femaleSet = new HashSet<>(nameTokens);
