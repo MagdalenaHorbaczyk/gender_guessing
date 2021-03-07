@@ -6,10 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -51,5 +49,43 @@ public class UserService {
         givenNameSplittedIntoTokens.close();
         System.out.println(list.size() + list.toString());
         return list;
+    }
+
+    public void guessGenderByFullName(String name) throws FileReaderException {
+        List<String> listOne = divide(name);
+        List<String> listCommonMale;
+        List<String> listCommonFemale;
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(Objects.requireNonNull(classLoader.getResource("file/male.txt")).getFile());
+        try (Stream<String> maleLines = Files.lines(Paths.get(file.getPath()))) {
+            Set<String> setOne = new HashSet<>(listOne);
+            listCommonMale = maleLines
+                    .filter(e -> setOne.contains(e))
+                    .collect(Collectors.toList());
+            System.out.println(listCommonMale.toString() + listCommonMale.size());
+        } catch (
+                IOException e) {
+            throw new FileReaderException();
+        }
+        File fileFemale = new File(Objects.requireNonNull(classLoader.getResource("file/female.txt")).getFile());
+        try (Stream<String> femaleLines = Files.lines(Paths.get(fileFemale.getPath()))) {
+            Set<String> setTwo = new HashSet<>(listOne);
+            listCommonFemale = femaleLines
+                    .filter(e -> setTwo.contains(e))
+                    .collect(Collectors.toList());
+            System.out.println(listCommonFemale.toString() + listCommonFemale.size());
+        } catch (
+                IOException e) {
+            throw new FileReaderException();
+        }
+        if (listCommonMale.size() > (listCommonFemale.size())
+                && (listCommonMale.size() + listCommonFemale.size() == listOne.size())) {
+            System.out.println(name + " is male.");
+        } else if (listCommonMale.size() < listCommonFemale.size()
+                && (listCommonMale.size() + listCommonFemale.size() == listOne.size())) {
+            System.out.println(name + " is female.");
+        } else {
+            System.out.println(name + " is inconclusive.");
+        }
     }
 }
