@@ -1,4 +1,4 @@
-package com.genderguessing;
+package com.genderguessing.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

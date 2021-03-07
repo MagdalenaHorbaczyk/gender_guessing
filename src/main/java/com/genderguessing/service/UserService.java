@@ -1,5 +1,6 @@
-package com.genderguessing;
+package com.genderguessing.service;
 
+import com.genderguessing.exception.FileReaderException;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
