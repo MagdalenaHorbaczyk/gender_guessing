@@ -12,80 +12,122 @@ import java.util.stream.Stream;
 
 @Service
 public class UserService {
+    File maleFile = new File(getMaleFile());
+    File femaleFile = new File(getFemaleFile());
 
-    public void guessGenderByFirstName(String name) throws FileReaderException {
-        String firstName = divide(name).get(0);
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(Objects.requireNonNull(classLoader.getResource("file/male.txt")).getFile());
-        try (Stream<String> fileLines = Files.lines(Paths.get(file.getPath()))) {
-            long i = fileLines.filter(line -> line.equals(firstName))
-                    .count();
-            if (i >= 1) {
-                System.out.println(firstName + " is male.");
-            } else {
-                File file1 = new File(Objects.requireNonNull(classLoader.getResource("file/female.txt")).getFile());
-                try (Stream<String> fileLines1 = Files.lines(Paths.get(file1.getPath()))) {
-                    long j = fileLines1.filter(line -> line.equals(firstName))
-                            .count();
-                    if (j == 1) {
-                        System.out.println(firstName + " is female");
-                    }
-                } catch (IOException e) {
-                    throw new FileReaderException();
-                }
-            }
-        } catch (IOException e) {
-            throw new FileReaderException();
-        }
-    }
-
-    public List<String> divide(String name) {
-        List<String> list = new ArrayList<>();
-        Scanner givenNameSplittedIntoTokens = new Scanner(name);
-        givenNameSplittedIntoTokens.useDelimiter("\s");
-        while (givenNameSplittedIntoTokens.hasNext()) {
-            list.add((givenNameSplittedIntoTokens.next()));
-        }
-        givenNameSplittedIntoTokens.close();
-        System.out.println(list.size() + list.toString());
-        return list;
-    }
-
-    public void guessGenderByFullName(String name) throws FileReaderException {
-        List<String> listOne = divide(name);
-        List<String> listCommonMale;
-        List<String> listCommonFemale;
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(Objects.requireNonNull(classLoader.getResource("file/male.txt")).getFile());
-        try (Stream<String> maleLines = Files.lines(Paths.get(file.getPath()))) {
-            Set<String> setOne = new HashSet<>(listOne);
-            listCommonMale = maleLines
-                    .filter(e -> setOne.contains(e))
-                    .collect(Collectors.toList());
-            System.out.println(listCommonMale.toString() + listCommonMale.size());
-        } catch (
-                IOException e) {
-            throw new FileReaderException();
-        }
-        File fileFemale = new File(Objects.requireNonNull(classLoader.getResource("file/female.txt")).getFile());
-        try (Stream<String> femaleLines = Files.lines(Paths.get(fileFemale.getPath()))) {
-            Set<String> setTwo = new HashSet<>(listOne);
-            listCommonFemale = femaleLines
-                    .filter(e -> setTwo.contains(e))
-                    .collect(Collectors.toList());
-            System.out.println(listCommonFemale.toString() + listCommonFemale.size());
-        } catch (
-                IOException e) {
-            throw new FileReaderException();
-        }
-        if (listCommonMale.size() > (listCommonFemale.size())
-                && (listCommonMale.size() + listCommonFemale.size() == listOne.size())) {
+    public void guessGenderByFirstToken(String name) throws FileReaderException {
+        String firstToken = tokenize(name).get(0);
+        if ((checkMaleList(firstToken)) >= 1) {
             System.out.println(name + " is male.");
-        } else if (listCommonMale.size() < listCommonFemale.size()
-                && (listCommonMale.size() + listCommonFemale.size() == listOne.size())) {
+        } else if ((checkFemaleList(firstToken)) >= 1) {
             System.out.println(name + " is female.");
         } else {
             System.out.println(name + " is inconclusive.");
         }
+    }
+
+    public List<String> tokenize(String name) {
+        List<String> nameTokenList = new ArrayList<>();
+        Scanner joinedName = new Scanner(name);
+        joinedName.useDelimiter("\s");
+        while (joinedName.hasNext()) {
+            nameTokenList.add((joinedName.next()));
+        }
+        joinedName.close();
+        return nameTokenList;
+    }
+
+    public int checkMaleList(String firstToken) throws FileReaderException {
+        List<String> firstTokenInMaleList;
+        try (Stream<String> maleLines = getMaleLines()) {
+            firstTokenInMaleList = maleLines
+                    .filter(line -> line.contains(firstToken))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new FileReaderException();
+        }
+        return firstTokenInMaleList.size();
+    }
+
+    private Stream<String> getMaleLines() throws IOException {
+        return Files.lines(Paths.get(maleFile.getPath()));
+    }
+
+    private String getMaleFile() {
+        return Objects.requireNonNull(getClassLoader().getResource("file/male.txt")).getFile();
+    }
+
+    private int checkFemaleList(String firstToken) throws FileReaderException {
+        List<String> firstTokenInFemaleList;
+        try (Stream<String> femaleLines = getFemaleLines()) {
+            firstTokenInFemaleList = femaleLines
+                    .filter(line -> line.contains(firstToken))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new FileReaderException();
+        }
+        return firstTokenInFemaleList.size();
+    }
+
+    private Stream<String> getFemaleLines() throws IOException {
+        return Files.lines(Paths.get(femaleFile.getPath()));
+    }
+
+    private String getFemaleFile() {
+        return Objects.requireNonNull(getClassLoader().getResource("file/female.txt")).getFile();
+    }
+
+    private ClassLoader getClassLoader() {
+        return getClass().getClassLoader();
+    }
+
+    public void guessGenderByFullName(String name) throws FileReaderException {
+        List<String> nameTokens = tokenize(name);
+        List<String> maleTokensFound = checkMaleListByFullName(nameTokens);
+        List<String> femaleTokensFound = checkFemaleListByFullName(nameTokens);
+        if (maleTokensFound.size() > (femaleTokensFound.size())
+                && (maleTokensFound.size() + femaleTokensFound.size() == nameTokens.size())) {
+            System.out.println(name + " is male.");
+        } else if (maleTokensFound.size() < femaleTokensFound.size()
+                && (maleTokensFound.size() + femaleTokensFound.size() == nameTokens.size())) {
+            System.out.println(name + " is female.");
+        } else {
+            System.out.println(name + " is inconclusive.");
+        }
+    }
+
+    private List<String> checkMaleListByFullName(List<String> nameTokens) throws FileReaderException {
+        List<String> maleTokensFound;
+        try (Stream<String> fileLines = getMaleLines()) {
+            Set<String> maleSet = new HashSet<>(nameTokens);
+            maleTokensFound = fileLines
+                    .filter(maleSet::contains)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new FileReaderException();
+        }
+        return maleTokensFound;
+    }
+
+    private List<String> checkFemaleListByFullName(List<String> nameTokens) throws FileReaderException {
+        List<String> femaleTokensFound;
+        try (Stream<String> fileLinesFemale = getFemaleLines()) {
+            Set<String> femaleSet = new HashSet<>(nameTokens);
+            femaleTokensFound = fileLinesFemale
+                    .filter(femaleSet::contains)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new FileReaderException();
+        }
+        return femaleTokensFound;
+    }
+
+    public List<List> findAvailableTokens(String name) throws FileReaderException {
+        List<String> nameTokens = tokenize(name);
+        List<List> tokensFound = new ArrayList<List>();
+        tokensFound.add(checkMaleListByFullName(nameTokens));
+        tokensFound.add(checkFemaleListByFullName(nameTokens));
+        System.out.println(tokensFound);
+        return tokensFound;
     }
 }
