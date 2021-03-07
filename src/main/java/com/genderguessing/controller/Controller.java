@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/gender")
 public class Controller {
@@ -16,13 +16,13 @@ public class Controller {
     UserService userService;
 
     @PostMapping("/byFirstName")
-    public void guessGenderByFirstName(@RequestBody String name) throws FileReaderException {
-        userService.guessGenderByFirstToken(name);
+    public String guessGenderByFirstName(@RequestBody String name) throws FileReaderException {
+        return userService.guessGenderByFirstToken(name);
     }
 
     @PostMapping("/byFullName")
-    public void guessGenderByFullName(@RequestBody String name) throws FileReaderException {
-        userService.guessGenderByFullName(name);
+    public String guessGenderByFullName(@RequestBody String name) throws FileReaderException {
+        return userService.guessGenderByFullName(name);
     }
 
     @GetMapping("/getNames")
