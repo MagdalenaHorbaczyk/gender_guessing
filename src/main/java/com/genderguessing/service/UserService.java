@@ -19,16 +19,14 @@ public class UserService {
 
     public String guessGenderByFirstToken(String name) throws FileReaderException {
         String firstToken = tokenize(name).get(0);
-        String result = null;
+        String result;
         if ((checkMaleList(firstToken)) >= 1) {
             result = name + " is male.";
-//            System.out.println(name + " is male.");
         } else if ((checkFemaleList(firstToken)) >= 1) {
             result = name + " is female.";
             System.out.println(name + " is female.");
         } else {
             result = name + " is inconclusive.";
-//            System.out.println(name + " is inconclusive.");
         }
         System.out.println(result);
         return result;
