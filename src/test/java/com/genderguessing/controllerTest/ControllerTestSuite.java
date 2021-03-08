@@ -1,4 +1,4 @@
-package com.genderguessing;
+package com.genderguessing.controllerTest;
 
 import com.genderguessing.controller.Controller;
 import com.genderguessing.exception.FileReaderException;

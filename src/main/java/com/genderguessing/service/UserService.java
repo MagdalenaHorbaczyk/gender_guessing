@@ -103,6 +103,7 @@ public class UserService {
         } else {
             result = name + " is inconclusive.";
         }
+        System.out.println(result);
         return result;
     }
 

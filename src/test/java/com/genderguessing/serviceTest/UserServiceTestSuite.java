@@ -1,4 +1,4 @@
-package com.genderguessing;
+package com.genderguessing.serviceTest;
 
 import com.genderguessing.exception.FileReaderException;
 import com.genderguessing.service.UserService;
